@@ -18,6 +18,7 @@ from persona.prompt_template.run_gpt_prompt import *
 from persona.prompt_template.gpt_structure import *
 from persona.cognitive_modules.retrieve import *
 
+# 生成反思的焦点
 def generate_focal_points(persona, n=3): 
   if debug: print ("GNS FUNCTION: <generate_focal_points>")
   
@@ -34,7 +35,7 @@ def generate_focal_points(persona, n=3):
 
   return run_gpt_prompt_focal_pt(persona, statements, n)[0]
 
-
+# 生成见解和证据
 def generate_insights_and_evidence(persona, nodes, n=5): 
   if debug: print ("GNS FUNCTION: <generate_insights_and_evidence>")
 
@@ -42,7 +43,7 @@ def generate_insights_and_evidence(persona, nodes, n=5):
   for count, node in enumerate(nodes): 
     statements += f'{str(count)}. {node.embedding_key}\n'
 
-  ret = run_gpt_prompt_insight_and_guidance(persona, statements, n)[0]
+  ret = run_gpt_prompt_insight_and_guidance(persona, s tatements, n)[0]
 
   print (ret)
   try: 
@@ -54,7 +55,7 @@ def generate_insights_and_evidence(persona, nodes, n=5):
   except: 
     return {"this is blank": "node_1"} 
 
-
+# 生成动作-事件三元组
 def generate_action_event_triple(act_desp, persona): 
   """TODO 
 
@@ -69,7 +70,7 @@ def generate_action_event_triple(act_desp, persona):
   if debug: print ("GNS FUNCTION: <generate_action_event_triple>")
   return run_gpt_prompt_event_triple(act_desp, persona)[0]
 
-
+# 生成情感分数
 def generate_poig_score(persona, event_type, description): 
   if debug: print ("GNS FUNCTION: <generate_poig_score>")
 
@@ -83,19 +84,19 @@ def generate_poig_score(persona, event_type, description):
                            persona.scratch.act_description)[0]
 
 
-
+# 生成对话规划思考
 def generate_planning_thought_on_convo(persona, all_utt):
   if debug: print ("GNS FUNCTION: <generate_planning_thought_on_convo>")
   return run_gpt_prompt_planning_thought_on_convo(persona, all_utt)[0]
 
-
+# 生成对话备忘录
 def generate_memo_on_convo(persona, all_utt):
   if debug: print ("GNS FUNCTION: <generate_memo_on_convo>")
   return run_gpt_prompt_memo_on_convo(persona, all_utt)[0]
 
 
 
-
+# 运行反思
 def run_reflect(persona):
   """
   Run the actual reflection. We generate the focal points, retrieve any 
@@ -131,7 +132,7 @@ def run_reflect(persona):
                                 thought, keywords, thought_poignancy, 
                                 thought_embedding_pair, evidence)
 
-
+# 反思触发器
 def reflection_trigger(persona): 
   """
   Given the current persona, determine whether the persona should run a 
@@ -154,7 +155,7 @@ def reflection_trigger(persona):
     return True 
   return False
 
-
+# 重置反思计数器
 def reset_reflection_counter(persona): 
   """
   We reset the counters used for the reflection trigger. 
@@ -185,7 +186,7 @@ def reflect(persona):
     reset_reflection_counter(persona)
 
 
-
+  # 这一段具体在做什么还不清楚
   # print (persona.scratch.name, "al;sdhfjlsad", persona.scratch.chatting_end_time)
   if persona.scratch.chatting_end_time: 
     # print("DEBUG", persona.scratch.curr_time + datetime.timedelta(0,10))

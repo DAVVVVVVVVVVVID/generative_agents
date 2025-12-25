@@ -12,13 +12,14 @@ sys.path.append('../../')
 from utils import *
 from global_methods import *
 
+# 空间记忆树类
 class MemoryTree: 
   def __init__(self, f_saved): 
     self.tree = {}
     if check_if_file_exists(f_saved): 
       self.tree = json.load(open(f_saved))
 
-
+  # 打印树结构
   def print_tree(self): 
     def _print_tree(tree, depth):
       dash = " >" * depth
@@ -34,13 +35,13 @@ class MemoryTree:
     
     _print_tree(self.tree, 0)
     
-
+  # 保存树结构到JSON文件
   def save(self, out_json):
     with open(out_json, "w") as outfile:
       json.dump(self.tree, outfile) 
 
 
-
+  # 获取当前世界中可访问的区域字符串 curr_world -> sector
   def get_str_accessible_sectors(self, curr_world): 
     """
     Returns a summary string of all the arenas that the persona can access 
@@ -59,7 +60,7 @@ class MemoryTree:
     x = ", ".join(list(self.tree[curr_world].keys()))
     return x
 
-
+  # 获取当前区域中可访问的场馆字符串 sector -> arena
   def get_str_accessible_sector_arenas(self, sector): 
     """
     Returns a summary string of all the arenas that the persona can access 
@@ -81,7 +82,7 @@ class MemoryTree:
     x = ", ".join(list(self.tree[curr_world][curr_sector].keys()))
     return x
 
-
+  # 获取当前场馆中可访问的游戏对象字符串 arena -> game objects
   def get_str_accessible_arena_game_objects(self, arena):
     """
     Get a str list of all accessible game objects that are in the arena. If 
@@ -107,7 +108,7 @@ class MemoryTree:
       x = ", ".join(list(self.tree[curr_world][curr_sector][curr_arena.lower()]))
     return x
 
-
+# 测试内置函数
 if __name__ == '__main__':
   x = f"../../../../environment/frontend_server/storage/the_ville_base_LinFamily/personas/Eddy Lin/bootstrap_memory/spatial_memory.json"
   x = MemoryTree(x)

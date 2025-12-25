@@ -4,6 +4,7 @@ Author: Joon Sung Park (joonspk@stanford.edu)
 File: print_prompt.py
 Description: For printing prompts when the setting for verbose is set to True.
 """
+# 一个简单的打印函数，用于显示提示模板和相关信息，当verbose设置为True时使用
 import sys
 sys.path.append('../')
 

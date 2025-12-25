@@ -11,6 +11,7 @@ sys.path.append('../../')
 
 from global_methods import *
 
+# 人物基本信息/反思模块/日程安排模块/当前行为模块/路程导航 -- 短期记忆模块
 class Scratch: 
   def __init__(self, f_saved): 
     # PERSONA HYPERPARAMETERS
@@ -22,6 +23,7 @@ class Scratch:
     # <retention> TODO 
     self.retention = 5
 
+    # 世界信息
     # WORLD INFORMATION
     # Perceived world time. 
     self.curr_time = None
@@ -30,6 +32,7 @@ class Scratch:
     # Perceived world daily requirement. 
     self.daily_plan_req = None
     
+    # 人物核心身份信息
     # THE CORE IDENTITY OF THE PERSONA 
     # Base information about the persona.
     self.name = None
@@ -41,10 +44,12 @@ class Scratch:
     # L1 stable traits.
     self.learned = None
     # L2 external implementation. 
+    # 表示当前状态的字符串，第三人称（似乎是）
     self.currently = None
     self.lifestyle = None
     self.living_area = None
 
+    # 反思模块参数
     # REFLECTION VARIABLES
     self.concept_forget = 100
     self.daily_reflection_time = 60 * 3
@@ -63,6 +68,7 @@ class Scratch:
     self.importance_ele_n = 0 
     self.thought_count = 5
 
+    # 日程安排模块参数
     # PERSONA PLANNING 
     # <daily_req> is a list of various goals the persona is aiming to achieve
     # today. 
@@ -103,6 +109,7 @@ class Scratch:
     #        ['working on her painting', 240], ... ['going to bed', 60]]
     self.f_daily_schedule_hourly_org = []
     
+    # 当前行为模块参数
     # CURR ACTION 
     # <address> is literally the string address of where the action is taking 
     # place.  It comes in the form of 
@@ -147,6 +154,7 @@ class Scratch:
     self.chatting_with_buffer = dict()
     self.chatting_end_time = None
 
+    # 路程导航模块参数
     # <path_set> is True if we've already calculated the path the persona will
     # take to execute this action. That path is stored in the persona's 
     # scratch.planned_path.
@@ -309,7 +317,7 @@ class Scratch:
     with open(out_json, "w") as outfile:
       json.dump(scratch, outfile, indent=2) 
 
-
+  # 根据当前时间获取当前应该进行的日程安排索引
   def get_f_daily_schedule_index(self, advance=0):
     """
     We get the current index of self.f_daily_schedule. 
@@ -351,7 +359,7 @@ class Scratch:
 
     return curr_index
 
-
+  # 根据当前时间获取当前应该进行的原始小时日程安排索引
   def get_f_daily_schedule_hourly_org_index(self, advance=0):
     """
     We get the current index of self.f_daily_schedule_hourly_org. 
@@ -378,7 +386,7 @@ class Scratch:
       curr_index += 1
     return curr_index
 
-
+  # 获取人物核心身份信息的字符串表示
   def get_str_iss(self): 
     """
     ISS stands for "identity stable set." This describes the commonset summary
@@ -413,54 +421,54 @@ class Scratch:
     commonset += f"Current Date: {self.curr_time.strftime('%A %B %d')}\n"
     return commonset
 
-
+  # 获取人物全名
   def get_str_name(self): 
     return self.name
 
-
+  # 获取人物姓氏
   def get_str_firstname(self): 
     return self.first_name
 
-
+  # 获取人物名字
   def get_str_lastname(self): 
     return self.last_name
 
-
+  # 获取人物年龄
   def get_str_age(self): 
     return str(self.age)
 
-
+  # 获取人物固有特质
   def get_str_innate(self): 
     return self.innate
 
-
+  # 获取人物习得特质
   def get_str_learned(self): 
     return self.learned
 
-
+  # 获取人物当前状态
   def get_str_currently(self): 
     return self.currently
 
-
+  # 获取人物生活方式
   def get_str_lifestyle(self): 
     return self.lifestyle
 
-
+  # 获取人物计划？人物需求？尚不理解
   def get_str_daily_plan_req(self): 
     return self.daily_plan_req
 
-
+  # 获取当前日期字符串表示
   def get_str_curr_date_str(self): 
     return self.curr_time.strftime("%A %B %d")
 
-
+  # 获取当前行为的事件
   def get_curr_event(self):
     if not self.act_address: 
       return (self.name, None, None)
     else: 
       return self.act_event
 
-
+  # 获取当前行为对象的事件以及行为的描述
   def get_curr_event_and_desc(self): 
     if not self.act_address: 
       return (self.name, None, None, None)
@@ -470,7 +478,7 @@ class Scratch:
               self.act_event[2],
               self.act_description)
 
-
+  # 获取当前行为地址，行为对象的事件以及行为对象的描述
   def get_curr_obj_event_and_desc(self): 
     if not self.act_address: 
       return ("", None, None, None)
@@ -480,7 +488,7 @@ class Scratch:
               self.act_obj_event[2],
               self.act_obj_description)
 
-
+  # 添加新的当前行为
   def add_new_action(self, 
                      action_address, 
                      action_duration,
@@ -515,7 +523,7 @@ class Scratch:
     
     self.act_path_set = False
 
-
+  # 获取当前行为的时间字符串表示
   def act_time_str(self): 
     """
     Returns a string output of the current time. 
@@ -529,7 +537,7 @@ class Scratch:
     """
     return self.act_start_time.strftime("%H:%M %p")
 
-
+  # 检查当前行为是否已经结束
   def act_check_finished(self): 
     """
     Checks whether the self.Action instance has finished.  
@@ -557,7 +565,7 @@ class Scratch:
       return True
     return False
 
-
+  # 获取当前行为的总结
   def act_summarize(self):
     """
     Summarize the current action as a dictionary. 
@@ -576,7 +584,7 @@ class Scratch:
     exp["pronunciatio"] = self.act_pronunciatio
     return exp
 
-
+  # 获取当前行为的字符串总结
   def act_summary_str(self):
     """
     Returns a string summary of the current action. Meant to be 
@@ -594,7 +602,7 @@ class Scratch:
     ret += f"Duration in minutes (e.g., x min): {str(self.act_duration)} min\n"
     return ret
 
-
+  # 获取日程安排的字符串总结
   def get_str_daily_schedule_summary(self): 
     ret = ""
     curr_min_sum = 0
@@ -605,7 +613,7 @@ class Scratch:
       ret += f"{hour:02}:{minute:02} || {row[0]}\n"
     return ret
 
-
+  # 获取原始小时日程安排的字符串总结
   def get_str_daily_schedule_hourly_org_summary(self): 
     ret = ""
     curr_min_sum = 0

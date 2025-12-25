@@ -16,6 +16,7 @@ from global_methods import *
 from persona.prompt_template.gpt_structure import *
 from persona.prompt_template.print_prompt import *
 
+# 生成一个随即长度（i和j之间）的字母数字字符串作为唯一标识符
 def get_random_alphanumeric(i=6, j=6): 
   """
   Returns a random alpha numeric strength that has the length of somewhere
@@ -36,6 +37,7 @@ def get_random_alphanumeric(i=6, j=6):
 # CHAPTER 1: Run GPT Prompt
 ##############################################################################
 
+# 运行GPT提示以确定起床时间
 def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=False): 
   """
   Given the persona, returns an integer that indicates the hour when the 
@@ -83,7 +85,7 @@ def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=False):
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
+# 运行GPT提示以生成每日计划
 def run_gpt_prompt_daily_plan(persona, 
                               wake_up_hour, 
                               test_input=None, 
@@ -157,7 +159,7 @@ def run_gpt_prompt_daily_plan(persona,
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
+# 运行GPT提示以生成每小时计划
 def run_gpt_prompt_generate_hourly_schedule(persona, 
                                             curr_hour_str,
                                             p_f_ds_hourly_org, 
@@ -287,13 +289,7 @@ def run_gpt_prompt_generate_hourly_schedule(persona,
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
-
-
-
+# 运行GPT提示以进行任务分解
 def run_gpt_prompt_task_decomp(persona, 
                                task, 
                                duration, 
@@ -488,8 +484,7 @@ def run_gpt_prompt_task_decomp(persona,
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
+# 运行GPT提示以确定操作的部门
 def run_gpt_prompt_action_sector(action_description, 
                                 persona, 
                                 maze, 
@@ -626,8 +621,7 @@ def run_gpt_prompt_action_sector(action_description,
 
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
+# 运行GPT提示以确定操作的区域
 def run_gpt_prompt_action_arena(action_description, 
                                 persona, 
                                 maze, act_world, act_sector,
@@ -721,8 +715,7 @@ def run_gpt_prompt_action_arena(action_description,
 
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
+# 运行GPT提示以确定操作的对象
 def run_gpt_prompt_action_game_object(action_description, 
                                       persona, 
                                       maze,
@@ -779,9 +772,7 @@ def run_gpt_prompt_action_game_object(action_description,
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
+# 运行GPT提示以生成动作的表情符号
 def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False): 
   def create_prompt_input(action_description): 
     if "(" in action_description: 
@@ -862,17 +853,7 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
   
   # return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
-
-
-
-
-
-
-
+# 运行GPT提示参考动作描述以生成动作三元组
 def run_gpt_prompt_event_triple(action_description, persona, verbose=False): 
   def create_prompt_input(action_description, persona): 
     if "(" in action_description: 
@@ -950,18 +931,7 @@ def run_gpt_prompt_event_triple(action_description, persona, verbose=False):
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
-
-
-
-
-
-
-
-
+# 运行GPT提示得到对象经过人物行为后的状态的描述
 def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=False): 
   def create_prompt_input(act_game_object, act_desp, persona): 
     prompt_input = [act_game_object, 
@@ -1034,14 +1004,7 @@ def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=Fals
   
   # return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
-
-
-
-
+# 运行GPT提示以生成动作对象事件三元组
 def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, verbose=False): 
   def create_prompt_input(act_game_object, act_obj_desc): 
     prompt_input = [act_game_object, 
@@ -1083,10 +1046,7 @@ def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, 
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
+# 运行GPT提示以生成新的分解时间表
 def run_gpt_prompt_new_decomp_schedule(persona, 
                                        main_act_dur, 
                                        truncated_act_dur, 
@@ -1236,11 +1196,7 @@ def run_gpt_prompt_new_decomp_schedule(persona,
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
-
+# 运行GPT提示以决定是否与目标人物交谈
 def run_gpt_prompt_decide_to_talk(persona, target_persona, retrieved,test_input=None, 
                                        verbose=False): 
   def create_prompt_input(init_persona, target_persona, retrieved, 
@@ -1338,9 +1294,7 @@ def run_gpt_prompt_decide_to_talk(persona, target_persona, retrieved,test_input=
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
+# 运行GPT提示以决定是否对目标人物做出反应
 def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input=None, 
                                        verbose=False): 
   def create_prompt_input(init_persona, target_persona, retrieved, 
@@ -1436,22 +1390,7 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# 运行GPT提示以创建与目标人物的对话
 def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
                                        test_input=None, verbose=False): 
   def create_prompt_input(init_persona, target_persona, curr_loc, 
@@ -1579,15 +1518,7 @@ def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
-
-
-
-
-
+# 运行GPT提示以总结对话内容
 def run_gpt_prompt_summarize_conversation(persona, conversation, test_input=None, verbose=False): 
   def create_prompt_input(conversation, test_input=None): 
     convo_str = ""
@@ -1659,9 +1590,7 @@ def run_gpt_prompt_summarize_conversation(persona, conversation, test_input=None
   
   # return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
+# 运行GPT提示以提取描述中的关键词
 def run_gpt_prompt_extract_keywords(persona, description, test_input=None, verbose=False): 
   def create_prompt_input(description, test_input=None): 
     if "\n" in description: 
@@ -1714,14 +1643,7 @@ def run_gpt_prompt_extract_keywords(persona, description, test_input=None, verbo
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
-
-
-
-
+# 运行GPT提示以将关键词转换为想法
 def run_gpt_prompt_keyword_to_thoughts(persona, keyword, concept_summary, test_input=None, verbose=False): 
   def create_prompt_input(persona, keyword, concept_summary, test_input=None): 
     prompt_input = [keyword, concept_summary, persona.name]
@@ -1758,14 +1680,7 @@ def run_gpt_prompt_keyword_to_thoughts(persona, keyword, concept_summary, test_i
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
-
-
-
-
+# 运行GPT提示以将对话转换为想法
 def run_gpt_prompt_convo_to_thoughts(persona, 
                                     init_persona_name,  
                                     target_persona_name,
@@ -1816,32 +1731,7 @@ def run_gpt_prompt_convo_to_thoughts(persona,
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# 运行GPT提示以评估事件的情感强度
 def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, verbose=False): 
   def create_prompt_input(persona, event_description, test_input=None): 
     prompt_input = [persona.scratch.name,
@@ -1914,7 +1804,7 @@ def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, 
   
   # return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
+# 运行GPT提示以评估想法的情感强度
 def run_gpt_prompt_thought_poignancy(persona, event_description, test_input=None, verbose=False): 
   def create_prompt_input(persona, event_description, test_input=None): 
     prompt_input = [persona.scratch.name,
@@ -1984,8 +1874,7 @@ def run_gpt_prompt_thought_poignancy(persona, event_description, test_input=None
   
   # return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
+# 运行GPT提示以评估聊天内容的情感强度
 def run_gpt_prompt_chat_poignancy(persona, event_description, test_input=None, verbose=False): 
   def create_prompt_input(persona, event_description, test_input=None): 
     prompt_input = [persona.scratch.name,
@@ -2057,10 +1946,7 @@ def run_gpt_prompt_chat_poignancy(persona, event_description, test_input=None, v
   
   # return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
+# 运行GPT提示以生成关注点
 def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=False): 
   def create_prompt_input(persona, statements, n, test_input=None): 
     prompt_input = [statements, str(n)]
@@ -2135,10 +2021,7 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=Fal
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-  
+# 运行GPT提示以生成见解和支持证据
 def run_gpt_prompt_insight_and_guidance(persona, statements, n, test_input=None, verbose=False): 
   def create_prompt_input(persona, statements, n, test_input=None): 
     prompt_input = [statements, str(n)]
@@ -2186,13 +2069,7 @@ def run_gpt_prompt_insight_and_guidance(persona, statements, n, test_input=None,
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
-
-
-
+# 运行GPT提示以总结聊天内容的想法
 def run_gpt_prompt_agent_chat_summarize_ideas(persona, target_persona, statements, curr_context, test_input=None, verbose=False): 
   def create_prompt_input(persona, target_persona, statements, curr_context, test_input=None): 
     prompt_input = [persona.scratch.get_str_curr_date_str(), curr_context, persona.scratch.currently, 
@@ -2259,9 +2136,7 @@ def run_gpt_prompt_agent_chat_summarize_ideas(persona, target_persona, statement
   
   # return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
+# 运行GPT提示以总结聊天内容的关系
 def run_gpt_prompt_agent_chat_summarize_relationship(persona, target_persona, statements, test_input=None, verbose=False): 
   def create_prompt_input(persona, target_persona, statements, test_input=None): 
     prompt_input = [statements, persona.scratch.name, target_persona.scratch.name]
@@ -2326,10 +2201,7 @@ def run_gpt_prompt_agent_chat_summarize_relationship(persona, target_persona, st
   
   # return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
+# 运行GPT提示以生成代理人之间的聊天内容
 def run_gpt_prompt_agent_chat(maze, persona, target_persona,
                                curr_context, 
                                init_summ_idea, 
@@ -2466,11 +2338,7 @@ def run_gpt_prompt_agent_chat(maze, persona, target_persona,
 # =======================
 
 
-
-
-
-
-
+# 运行GPT提示以总结想法
 def run_gpt_prompt_summarize_ideas(persona, statements, question, test_input=None, verbose=False): 
   def create_prompt_input(persona, statements, question, test_input=None): 
     prompt_input = [statements, persona.scratch.name, question]
@@ -2535,8 +2403,7 @@ def run_gpt_prompt_summarize_ideas(persona, statements, question, test_input=Non
   
   # return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
+# 运行GPT提示以生成对话的下一行
 def run_gpt_prompt_generate_next_convo_line(persona, interlocutor_desc, prev_convo, retrieved_summary, test_input=None, verbose=False): 
   def create_prompt_input(persona, interlocutor_desc, prev_convo, retrieved_summary, test_input=None): 
     prompt_input = [persona.scratch.name, 
@@ -2610,11 +2477,7 @@ def run_gpt_prompt_generate_next_convo_line(persona, interlocutor_desc, prev_con
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
-
-
+# 运行GPT提示以生成耳语的内心想法
 def run_gpt_prompt_generate_whisper_inner_thought(persona, whisper, test_input=None, verbose=False): 
   def create_prompt_input(persona, whisper, test_input=None): 
     prompt_input = [persona.scratch.name, whisper]
@@ -2650,8 +2513,7 @@ def run_gpt_prompt_generate_whisper_inner_thought(persona, whisper, test_input=N
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
+# 运行GPT提示以生成对话的计划想法
 def run_gpt_prompt_planning_thought_on_convo(persona, all_utt, test_input=None, verbose=False): 
   def create_prompt_input(persona, all_utt, test_input=None): 
     prompt_input = [all_utt, persona.scratch.name, persona.scratch.name, persona.scratch.name]
@@ -2687,8 +2549,7 @@ def run_gpt_prompt_planning_thought_on_convo(persona, all_utt, test_input=None, 
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
+# 运行GPT提示以生成对话的备忘录
 def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=False): 
   def create_prompt_input(persona, all_utt, test_input=None): 
     prompt_input = [all_utt, persona.scratch.name, persona.scratch.name, persona.scratch.name]
@@ -2753,9 +2614,7 @@ def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=Fals
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
-
+# 运行GPT提示以生成评论的安全评分
 def run_gpt_generate_safety_score(persona, comment, test_input=None, verbose=False): 
   def create_prompt_input(comment, test_input=None):
     prompt_input = [comment]
@@ -2795,8 +2654,7 @@ def run_gpt_generate_safety_score(persona, comment, test_input=None, verbose=Fal
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
-
+# 提取字符串中的第一个JSON字典
 def extract_first_json_dict(data_str):
     # Find the first occurrence of a JSON object within the string
     start_idx = data_str.find('{')
@@ -2817,7 +2675,7 @@ def extract_first_json_dict(data_str):
         # If parsing fails, return None
         return None
 
-
+# 运行GPT提示以生成迭代聊天的下一句
 def run_gpt_generate_iterative_chat_utt(maze, init_persona, target_persona, retrieved, curr_context, curr_chat, test_input=None, verbose=False): 
   def create_prompt_input(maze, init_persona, target_persona, retrieved, curr_context, curr_chat, test_input=None):
     persona = init_persona

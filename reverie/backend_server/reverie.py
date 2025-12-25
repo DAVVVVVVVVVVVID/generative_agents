@@ -47,12 +47,16 @@ class ReverieServer:
     # <fork_sim_code> indicates the simulation we are forking from. 
     # Interestingly, all simulations must be forked from some initial 
     # simulation, where the first simulation is "hand-crafted".
+    # 从先前的模拟中分叉：
+    # <fork_sim_code>表示我们要分叉的模拟。
+    # 有趣的是，所有模拟都必须从某个初始模拟中分叉出来，第一个模拟是“手工制作”的。
     self.fork_sim_code = fork_sim_code
     fork_folder = f"{fs_storage}/{self.fork_sim_code}"
 
     # <sim_code> indicates our current simulation. The first step here is to 
     # copy everything that's in <fork_sim_code>, but edit its 
     # reverie/meta/json's fork variable. 
+    # <sim_code>表示我们当前的模拟。这里的第一步是复制<fork_sim_code>中的所有内容，但编辑其reverie/meta/json的fork变量。
     self.sim_code = sim_code
     sim_folder = f"{fs_storage}/{self.sim_code}"
     copyanything(fork_folder, sim_folder)

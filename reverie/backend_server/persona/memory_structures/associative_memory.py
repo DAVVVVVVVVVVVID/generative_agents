@@ -15,13 +15,13 @@ import datetime
 
 from global_methods import *
 
-
+# Concept Node 数据类型的定义
 class ConceptNode: 
   def __init__(self,
-               node_id, node_count, type_count, node_type, depth,
-               created, expiration, 
-               s, p, o, 
-               description, embedding_key, poignancy, keywords, filling): 
+               node_id, node_count, type_count, node_type, depth, # 节点基本属性
+               created, expiration,  # 时间属性
+               s, p, o, # 语义三元组
+               description, embedding_key, poignancy, keywords, filling): # 其他属性（便于检索）
     self.node_id = node_id
     self.node_count = node_count
     self.type_count = type_count
@@ -42,28 +42,34 @@ class ConceptNode:
     self.keywords = keywords
     self.filling = filling
 
-
+  # 获取三元组摘要
   def spo_summary(self): 
     return (self.subject, self.predicate, self.object)
 
-
+# 关联记忆模块的定义 -- 长期记忆模块
 class AssociativeMemory: 
   def __init__(self, f_saved): 
+    # id与节点的映射字典
     self.id_to_node = dict()
 
+    # 三种类型的节点的序列，按时间倒序排列（第一个元素对应最新事件）
     self.seq_event = []
     self.seq_thought = []
     self.seq_chat = []
 
+    # 关键词与节点列表的映射字典
     self.kw_to_event = dict()
     self.kw_to_thought = dict()
     self.kw_to_chat = dict()
 
+    # 关键词与强度的映射字典
     self.kw_strength_event = dict()
     self.kw_strength_thought = dict()
 
+    # 加载 Embeddings 存储
     self.embeddings = json.load(open(f_saved + "/embeddings.json"))
 
+    # 加载节点数据
     nodes_load = json.load(open(f_saved + "/nodes.json"))
     for count in range(len(nodes_load.keys())): 
       node_id = f"node_{str(count+1)}"
@@ -102,6 +108,7 @@ class AssociativeMemory:
         self.add_thought(created, expiration, s, p, o, 
                    description, keywords, poignancy, embedding_pair, filling)
 
+    # 加载关键词强度数据
     kw_strength_load = json.load(open(f_saved + "/kw_strength.json"))
     if kw_strength_load["kw_strength_event"]: 
       self.kw_strength_event = kw_strength_load["kw_strength_event"]
@@ -149,7 +156,7 @@ class AssociativeMemory:
     with open(out_json+"/embeddings.json", "w") as outfile:
       json.dump(self.embeddings, outfile)
 
-
+  # 添加事件节点
   def add_event(self, created, expiration, s, p, o, 
                       description, keywords, poignancy, 
                       embedding_pair, filling):
@@ -195,7 +202,7 @@ class AssociativeMemory:
 
     return node
 
-
+  # 添加思考节点
   def add_thought(self, created, expiration, s, p, o, 
                         description, keywords, poignancy, 
                         embedding_pair, filling):
@@ -239,7 +246,7 @@ class AssociativeMemory:
 
     return node
 
-
+  # 添加聊天节点
   def add_chat(self, created, expiration, s, p, o, 
                      description, keywords, poignancy, 
                      embedding_pair, filling): 
@@ -270,28 +277,28 @@ class AssociativeMemory:
         
     return node
 
-
+  # 获取最近事件的摘要集合
   def get_summarized_latest_events(self, retention): 
     ret_set = set()
     for e_node in self.seq_event[:retention]: 
       ret_set.add(e_node.spo_summary())
     return ret_set
 
-
+  # 获取事件字符串表示
   def get_str_seq_events(self): 
     ret_str = ""
     for count, event in enumerate(self.seq_event): 
       ret_str += f'{"Event", len(self.seq_event) - count, ": ", event.spo_summary(), " -- ", event.description}\n'
     return ret_str
 
-
+  # 获取思考字符串表示
   def get_str_seq_thoughts(self): 
     ret_str = ""
     for count, event in enumerate(self.seq_thought): 
       ret_str += f'{"Thought", len(self.seq_thought) - count, ": ", event.spo_summary(), " -- ", event.description}'
     return ret_str
 
-
+  # 获取聊天字符串表示
   def get_str_seq_chats(self): 
     ret_str = ""
     for count, event in enumerate(self.seq_chat): 
@@ -301,7 +308,7 @@ class AssociativeMemory:
         ret_str += f"{row[0]}: {row[1]}\n"
     return ret_str
 
-
+  # 根据语义三元组获取相关思考节点集合
   def retrieve_relevant_thoughts(self, s_content, p_content, o_content): 
     contents = [s_content, p_content, o_content]
 
@@ -313,7 +320,7 @@ class AssociativeMemory:
     ret = set(ret)
     return ret
 
-
+  # 根据语义三元组获取相关事件节点集合
   def retrieve_relevant_events(self, s_content, p_content, o_content): 
     contents = [s_content, p_content, o_content]
 
@@ -325,7 +332,7 @@ class AssociativeMemory:
     ret = set(ret)
     return ret
 
-
+  # 获取与指定角色的最后一次聊天记录
   def get_last_chat(self, target_persona_name): 
     if target_persona_name.lower() in self.kw_to_chat: 
       return self.kw_to_chat[target_persona_name.lower()][0]

@@ -20,6 +20,7 @@ from persona.cognitive_modules.converse import *
 # CHAPTER 2: Generate
 ##############################################################################
 
+# 生成角色的起床时间
 def generate_wake_up_hour(persona):
   """
   Generates the time when the persona wakes up. This becomes an integral part
@@ -37,7 +38,7 @@ def generate_wake_up_hour(persona):
   if debug: print ("GNS FUNCTION: <generate_wake_up_hour>")
   return int(run_gpt_prompt_wake_up_hour(persona)[0])
 
-
+# 生成角色的每日计划
 def generate_first_daily_plan(persona, wake_up_hour): 
   """
   Generates the daily plan for the persona. 
@@ -67,7 +68,7 @@ def generate_first_daily_plan(persona, wake_up_hour):
   if debug: print ("GNS FUNCTION: <generate_first_daily_plan>")
   return run_gpt_prompt_daily_plan(persona, wake_up_hour)[0]
 
-
+# 生成角色的每小时计划
 def generate_hourly_schedule(persona, wake_up_hour): 
   """
   Based on the daily req, creates an hourly schedule -- one hour at a time. 
@@ -137,7 +138,7 @@ def generate_hourly_schedule(persona, wake_up_hour):
 
   return n_m1_hourly_compressed
 
-
+# 生成任务分解
 def generate_task_decomp(persona, task, duration): 
   """
   A few shot decomposition of a task given the task description 
@@ -163,7 +164,7 @@ def generate_task_decomp(persona, task, duration):
   if debug: print ("GNS FUNCTION: <generate_task_decomp>")
   return run_gpt_prompt_task_decomp(persona, task, duration)[0]
 
-
+# 生成行动地点-区 有一个TODO在这里
 def generate_action_sector(act_desp, persona, maze): 
   """TODO 
   Given the persona and the task description, choose the action_sector. 
@@ -181,7 +182,7 @@ def generate_action_sector(act_desp, persona, maze):
   if debug: print ("GNS FUNCTION: <generate_action_sector>")
   return run_gpt_prompt_action_sector(act_desp, persona, maze)[0]
 
-
+# 生成行动地点-场所 有一个TODO在这里
 def generate_action_arena(act_desp, persona, maze, act_world, act_sector): 
   """TODO 
   Given the persona and the task description, choose the action_arena. 
@@ -199,7 +200,7 @@ def generate_action_arena(act_desp, persona, maze, act_world, act_sector):
   if debug: print ("GNS FUNCTION: <generate_action_arena>")
   return run_gpt_prompt_action_arena(act_desp, persona, maze, act_world, act_sector)[0]
 
-
+# 生成行动对象 有一个TODO在这里
 def generate_action_game_object(act_desp, act_address, persona, maze):
   """TODO
   Given the action description and the act address (the address where
@@ -222,7 +223,7 @@ def generate_action_game_object(act_desp, act_address, persona, maze):
     return "<random>"
   return run_gpt_prompt_action_game_object(act_desp, persona, maze, act_address)[0]
 
-
+# 生成行动emoji 有一个TODO在这里
 def generate_action_pronunciatio(act_desp, persona): 
   """TODO 
   Given an action description, creates an emoji string description via a few
@@ -248,7 +249,7 @@ def generate_action_pronunciatio(act_desp, persona):
     return "🙂"
   return x
 
-
+# 生成行动事件三元组 有一个TODO在这里
 def generate_action_event_triple(act_desp, persona): 
   """TODO 
 
@@ -263,17 +264,17 @@ def generate_action_event_triple(act_desp, persona):
   if debug: print ("GNS FUNCTION: <generate_action_event_triple>")
   return run_gpt_prompt_event_triple(act_desp, persona)[0]
 
-
+# 生成行动对象描述
 def generate_act_obj_desc(act_game_object, act_desp, persona): 
   if debug: print ("GNS FUNCTION: <generate_act_obj_desc>")
   return run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona)[0]
 
-
+# 生成行动对象-事件三元组
 def generate_act_obj_event_triple(act_game_object, act_obj_desc, persona): 
   if debug: print ("GNS FUNCTION: <generate_act_obj_event_triple>")
   return run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona)[0]
 
-
+# 生成对话
 def generate_convo(maze, init_persona, target_persona): 
   curr_loc = maze.access_tile(init_persona.scratch.curr_tile)
 
@@ -292,12 +293,12 @@ def generate_convo(maze, init_persona, target_persona):
   if debug: print ("GNS FUNCTION: <generate_convo>")
   return convo, convo_length
 
-
+# 生成对话摘要
 def generate_convo_summary(persona, convo): 
   convo_summary = run_gpt_prompt_summarize_conversation(persona, convo)[0]
   return convo_summary
 
-
+# 生成是否决定交谈
 def generate_decide_to_talk(init_persona, target_persona, retrieved): 
   x =run_gpt_prompt_decide_to_talk(init_persona, target_persona, retrieved)[0]
   if debug: print ("GNS FUNCTION: <generate_decide_to_talk>")
@@ -307,12 +308,12 @@ def generate_decide_to_talk(init_persona, target_persona, retrieved):
   else: 
     return False
 
-
+# 生成是否决定反应
 def generate_decide_to_react(init_persona, target_persona, retrieved): 
   if debug: print ("GNS FUNCTION: <generate_decide_to_react>")
   return run_gpt_prompt_decide_to_react(init_persona, target_persona, retrieved)[0]
 
-
+# 生成新的分解日程
 def generate_new_decomp_schedule(persona, inserted_act, inserted_act_dur,  start_hour, end_hour): 
   # Step 1: Setting up the core variables for the function. 
   # <p> is the persona whose schedule we are editing right now. 
@@ -405,6 +406,8 @@ def generate_new_decomp_schedule(persona, inserted_act, inserted_act_dur,  start
 # CHAPTER 3: Plan
 ##############################################################################
 
+# 复习身份
+# 更新了当前状态和每日计划
 def revise_identity(persona): 
   p_name = persona.scratch.name
 
@@ -418,6 +421,7 @@ def revise_identity(persona):
       statements += f"{i.created.strftime('%A %B %d -- %H:%M %p')}: {i.embedding_key}\n"
 
   # print (";adjhfno;asdjao;idfjo;af", p_name)
+  # 这里使用的都是第三人称提问方法？为什么？
   plan_prompt = statements + "\n"
   plan_prompt += f"Given the statements above, is there anything that {p_name} should remember as they plan for"
   plan_prompt += f" *{persona.scratch.curr_time.strftime('%A %B %d')}*? "
@@ -457,7 +461,7 @@ def revise_identity(persona):
   print ("WE ARE HERE!!!", new_daily_req)
   persona.scratch.daily_plan_req = new_daily_req
 
-
+# 生成长期计划
 def _long_term_planning(persona, new_day): 
   """
   Formulates the persona's daily long-term plan if it is the start of a new 
@@ -516,8 +520,7 @@ def _long_term_planning(persona, new_day):
   # time.sleep(10)
   # print("Done sleeping!")
 
-
-
+# 对计划进行拆解，然后决定下一步行动
 def _determine_action(persona, maze): 
   """
   Creates the next action sequence for the persona. 
@@ -530,6 +533,16 @@ def _determine_action(persona, maze):
     persona: Current <Persona> instance whose action we are determining. 
     maze: Current <Maze> instance. 
   """
+  """
+  创造下一个行动序列给角色。
+  这个函数的主要目标是运行“add_new_action”在角色的scratch空间上，
+  它为下一个行动设置所有与行动相关的变量。
+  作为这个的一部分，角色可能需要根据需要分解它的每小时计划。
+  INPUT
+    persona: 当前<Persona>实例，我们正在决定它的行动。
+    maze: 当前<Maze>实例。
+  """
+  # 内部函数：决定是否需要分解，主要是针对睡觉的情况
   def determine_decomp(act_desp, act_dura):
     """
     Given an action description and its duration, we determine whether we need
@@ -541,6 +554,15 @@ def _determine_action(persona, maze):
       act_dura: the duration of the action in minutes. 
     OUTPUT: 
       a boolean. True if we need to decompose, False otherwise. 
+    """
+    """
+    给定一个行动描述及其持续时间，我们确定是否需要分解它。
+    如果行动是关于角色睡觉的，我们通常不想分解它，所以我们在这里捕捉到这一点。
+    INPUT: 
+      act_desp: 行动的描述（例如，“睡觉”）
+      act_dura: 行动的持续时间，以分钟为单位。
+    OUTPUT: 
+      一个布尔值。如果我们需要分解则为True，否则为False。
     """
     if "sleep" not in act_desp and "bed" not in act_desp: 
       return True
@@ -556,12 +578,16 @@ def _determine_action(persona, maze):
   # chunk actions. 
   # Importantly, we try to decompose at least two hours worth of schedule at
   # any given point. 
+  # 这个函数的目标是让我们获得与<curr_index>相关的行动。
+  # 作为这个的一部分，我们可能需要分解一些大块的行动。
+  # 重要的是，我们尝试在任何给定点分解至少两个小时的计划。
   curr_index = persona.scratch.get_f_daily_schedule_index()
   curr_index_60 = persona.scratch.get_f_daily_schedule_index(advance=60)
 
   # * Decompose * 
   # During the first hour of the day, we need to decompose two hours 
   # sequence. We do that here. 
+  # 在一天的第一小时，我们需要分解两个小时的序列。我们在这里做这个。
   if curr_index == 0:
     # This portion is invoked if it is the first hour of the day. 
     act_desp, act_dura = persona.scratch.f_daily_schedule[curr_index]
@@ -583,6 +609,8 @@ def _determine_action(persona, maze):
     # also invoked during the first hour of the day -- to double up so we can
     # decompose two hours in one go). Of course, we need to have something to
     # decompose as well, so we check for that too. 
+    # 如果不是一天的第一小时，这总是被调用（它也在一天的第一小时被调用——双倍分解两个小时）。
+    # 当然，我们也需要有东西可以分解，所以我们也检查这一点。
     if persona.scratch.curr_time.hour < 23:
       # And we don't want to decompose after 11 pm. 
       act_desp, act_dura = persona.scratch.f_daily_schedule[curr_index_60]
@@ -611,7 +639,7 @@ def _determine_action(persona, maze):
   if 1440 - x_emergency > 0: 
     print ("x_emergency__AAA", x_emergency)
   persona.scratch.f_daily_schedule += [["sleeping", 1440 - x_emergency]]
-  
+
 
 
 
@@ -651,7 +679,7 @@ def _determine_action(persona, maze):
                                  act_obj_pron, 
                                  act_obj_event)
 
-
+# 选择检索到的事件
 def _choose_retrieved(persona, retrieved): 
   """
   Retrieved elements have multiple core "curr_events". We need to choose one
@@ -666,10 +694,21 @@ def _choose_retrieved(persona, retrieved):
                   ["events"] = [<ConceptNode>, ...], 
                   ["thoughts"] = [<ConceptNode>, ...] }
   """
+  """
+  检索到的元素有多个核心“curr_events”。 我们需要选择一个事件来反应。我们在这里选择该事件。
+  INPUT
+    persona: 当前<Persona>实例，我们正在决定它的行动。
+    retrieved: 从角色的联想记忆中检索到的<ConceptNode>字典。 该字典采用以下形式：
+               dictionary[event.description] =
+                 {["curr_event"] = <ConceptNode>,
+                  ["events"] = [<ConceptNode>, ...],
+                  ["thoughts"] = [<ConceptNode>, ...] }
+  """
   # Once we are done with the reflection, we might want to build a more  
   # complex structure here.
   
   # We do not want to take self events... for now 
+  # 我们不想接受自我事件...暂时
   copy_retrieved = retrieved.copy()
   for event_desc, rel_ctx in copy_retrieved.items(): 
     curr_event = rel_ctx["curr_event"]
@@ -677,6 +716,7 @@ def _choose_retrieved(persona, retrieved):
       del retrieved[event_desc]
 
   # Always choose persona first.
+  # 经常选择角色优先。
   priority = []
   for event_desc, rel_ctx in retrieved.items(): 
     curr_event = rel_ctx["curr_event"]
@@ -695,7 +735,7 @@ def _choose_retrieved(persona, retrieved):
     return random.choice(priority)
   return None
 
-
+# 决定是否应该反应：后续需要结合实际情况详细阅读，理解不足
 def _should_react(persona, retrieved, personas): 
   """
   Determines what form of reaction the persona should exihibit given the 
@@ -711,6 +751,17 @@ def _should_react(persona, retrieved, personas):
                   ["thoughts"] = [<ConceptNode>, ...] }
     personas: A dictionary that contains all persona names as keys, and the 
               <Persona> instance as values. 
+  """
+  """
+  决定角色应该展示的反应形式，给定检索到的值。
+  INPUT
+    persona: 当前<Persona>实例，我们正在决定它的行动。
+    retrieved: 从角色的联想记忆中检索到的<ConceptNode>字典。 该字典采用以下形式：
+               dictionary[event.description] =
+                 {["curr_event"] = <ConceptNode>,
+                  ["events"] = [<ConceptNode>, ...],
+                  ["thoughts"] = [<ConceptNode>, ...] }
+    personas: 一个包含所有角色名称作为键，<Persona>实例作为值的字
   """
   def lets_talk(init_persona, target_persona, retrieved):
     if (not target_persona.scratch.act_address 
@@ -802,7 +853,7 @@ def _should_react(persona, retrieved, personas):
     return react_mode
   return False
 
-
+# 创建反应
 def _create_react(persona, inserted_act, inserted_act_dur,
                   act_address, act_event, chatting_with, chat, chatting_with_buffer,
                   chatting_end_time, 
@@ -856,7 +907,7 @@ def _create_react(persona, inserted_act, inserted_act_dur,
                            act_obj_event,
                            act_start_time)
 
-
+# 聊天反应
 def _chat_react(maze, persona, focused_event, reaction_mode, personas):
   # There are two personas -- the persona who is initiating the conversation
   # and the persona who is the target. We get the persona instances here. 
@@ -903,7 +954,7 @@ def _chat_react(maze, persona, focused_event, reaction_mode, personas):
       act_pronunciatio, act_obj_description, act_obj_pronunciatio, 
       act_obj_event, act_start_time)
 
-
+# 等待反应
 def _wait_react(persona, reaction_mode): 
   p = persona
 
@@ -927,7 +978,7 @@ def _wait_react(persona, reaction_mode):
     act_address, act_event, chatting_with, chat, chatting_with_buffer, chatting_end_time,
     act_pronunciatio, act_obj_description, act_obj_pronunciatio, act_obj_event)
 
-
+# 计划主函数
 def plan(persona, maze, personas, new_day, retrieved): 
   """
   Main cognitive function of the chain. It takes the retrieved memory and 
@@ -950,11 +1001,26 @@ def plan(persona, maze, personas, new_day, retrieved):
   OUTPUT 
     The target action address of the persona (persona.scratch.act_address).
   """ 
+  """
+  主要的认知链功能。 它利用检索到的记忆和感知，以及迷宫和第一天状态，为角色进行长期和短期规划。
+  INPUT: 
+    maze: 当前<Maze>实例的世界。
+    personas: 一个包含所有角色名称作为键，<Persona>实例作为值的字典。
+    new_day: 这可以取三个值之一。
+      1) <Boolean> False -- 它不是“新的一天”周期（如果是的话，我们需要为角色调用长期规划序列）。
+      2) <String> "First day" -- 它实际上是模拟的开始，所以不仅是新的一天，而且还是第一天。
+      2) <String> "New day" -- 它是新的一天。
+    retrieved: 字典的字典。 第一层指定一个事件，而后层指定相关的“curr_event”、“events”和“thoughts”。
+  OUTPUT 
+    角色的目标行动地址（persona.scratch.act_address）。
+  """
   # PART 1: Generate the hourly schedule. 
+  # Part 1: 生成每小时的时间表。
   if new_day: 
     _long_term_planning(persona, new_day)
 
   # PART 2: If the current action has expired, we want to create a new plan.
+  # Part 2: 如果当前行动已经过期，我们想要创建一个新计划。
   if persona.scratch.act_check_finished(): 
     _determine_action(persona, maze)
 
@@ -967,6 +1033,12 @@ def plan(persona, maze, personas, new_day, retrieved):
   #         dictionary {["curr_event"] = <ConceptNode>, 
   #                     ["events"] = [<ConceptNode>, ...], 
   #                     ["thoughts"] = [<ConceptNode>, ...]}
+  # Part 3: 如果你感知到一个需要回应的事件（看到另一个角色），并检索到相关信息。
+  # 第1步：检索可能包含多个事件。 这里的第一项工作是确定我们想要为角色关注的事件。
+  #         <focused_event>采用这样的字典形式：
+  #         dictionary {["curr_event"] = <ConceptNode>,
+  #                     ["events"] = [<ConceptNode>, ...],
+  #                     ["thoughts"] = [<ConceptNode>, ...]}
   focused_event = False
   if retrieved.keys(): 
     focused_event = _choose_retrieved(persona, retrieved)
@@ -974,6 +1046,10 @@ def plan(persona, maze, personas, new_day, retrieved):
   # Step 2: Once we choose an event, we need to determine whether the
   #         persona will take any actions for the perceived event. There are
   #         three possible modes of reaction returned by _should_react. 
+  #         a) "chat with {target_persona.name}"
+  #         b) "react"
+  #         c) False
+  # 第2步：一旦我们选择了一个事件，我们需要确定角色是否会对感知到的事件采取任何行动。 有三种可能的反应模式由_should_react返回。
   #         a) "chat with {target_persona.name}"
   #         b) "react"
   #         c) False
@@ -991,6 +1067,8 @@ def plan(persona, maze, personas, new_day, retrieved):
   # Step 3: Chat-related state clean up. 
   # If the persona is not chatting with anyone, we clean up any of the 
   # chat-related states here. 
+  # 第3步：聊天相关状态清理。
+  # 如果角色没有与任何人聊天，我们在这里清理任何与聊天相关的状态。
   if persona.scratch.act_event[1] != "chat with":
     persona.scratch.chatting_with = None
     persona.scratch.chat = None

@@ -7,6 +7,7 @@ interface with the safe_generate_response function.
 
 Note (March 10, 2023) -- Defunct
 """
+# 似乎是已经被废弃的代码文件
 import re
 import datetime
 import sys
@@ -251,11 +252,6 @@ def run_gpt_prompt_generate_hourly_schedule(persona,
                       prompt_input, prompt, output)
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
-
-
-
-
 
 
 

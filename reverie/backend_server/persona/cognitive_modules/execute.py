@@ -32,11 +32,26 @@ def execute(persona, maze, personas, plan):
   OUTPUT: 
     execution
   """
+  """
+  给定一个计划（动作的字符串地址），我们执行该计划（实际输出瓷砖坐标路径和角色的下一个坐标）。
+  输入：
+    persona：当前的<Persona>实例。
+    maze：当前<Maze>的一个实例。
+    personas：世界上所有角色的字典。
+    plan：这是我们需要执行的动作的字符串地址。
+       它的形式为“{world}:{sector}:{arena}:{game_objects}”。
+       重要的是，您在访问此内容时不要进行负索引（例如[-1]），因为在某些情况下后面的地址元素可能不存在。
+       例如，“dolores double studio:double studio:bedroom 1:bed”
+  输出：
+    execution
+  """
+  # 如果计划中包含<random>，并且当前没有计划路径，则将act_path_set设置为False
   if "<random>" in plan and persona.scratch.planned_path == []: 
     persona.scratch.act_path_set = False
 
   # <act_path_set> is set to True if the path is set for the current action. 
   # It is False otherwise, and means we need to construct a new path. 
+  # 如果当前动作的路径已设置，则将<act_path_set>设置为True。否则为False，表示我们需要构建一个新路径。
   if not persona.scratch.act_path_set: 
     # <target_tiles> is a list of tile coordinates where the persona may go 
     # to execute the current action. The goal is to pick one of them.
@@ -147,6 +162,7 @@ def execute(persona, maze, personas, plan):
   
   # Setting up the next immediate step. We stay at our curr_tile if there is
   # no <planned_path> left, but otherwise, we go to the next tile in the path.
+  # 设置下一个即时步骤。如果没有<planned_path>，我们停留在curr_tile，否则，我们进入路径中的下一个瓷砖。
   ret = persona.scratch.curr_tile
   if persona.scratch.planned_path: 
     ret = persona.scratch.planned_path[0]
