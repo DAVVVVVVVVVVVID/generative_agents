@@ -625,7 +625,7 @@ def run_gpt_prompt_action_sector(action_description,
                       prompt_input, prompt, output)
 
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
-
+#
 
 
 def run_gpt_prompt_action_arena(action_description, 

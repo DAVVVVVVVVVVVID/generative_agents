@@ -146,7 +146,7 @@ def ChatGPT_safe_generate_response(prompt,
       curr_gpt_response = curr_gpt_response[:end_index]
       curr_gpt_response = json.loads(curr_gpt_response)["output"]
 
-      # print ("---ashdfaf")
+      print ("---ashdfaf")
       # print (curr_gpt_response)
       # print ("000asdfhia")
       
@@ -190,6 +190,7 @@ def ChatGPT_safe_generate_response_OLD(prompt,
   return fail_safe_response
 
 
+# 这个模型已经被弃用
 # ============================================================================
 # ###################[SECTION 2: ORIGINAL GPT-3 STRUCTURE] ###################
 # ============================================================================
