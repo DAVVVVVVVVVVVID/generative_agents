@@ -11,6 +11,8 @@ import datetime
 import sys
 import ast
 
+from regex import F, T
+
 sys.path.append('../../')
 
 from global_methods import *
@@ -32,14 +34,11 @@ def get_random_alphanumeric(i=6, j=6):
   x = ''.join(random.choices(string.ascii_letters + string.digits, k=k))
   return x
 
-
-verbose = False
-
 ##############################################################################
 # CHAPTER 1: Run ChatGPT Prompt (ChatGPT API versions)
 ##############################################################################
 
-def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=verbose):
+def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=False):
   """
   Given the persona, returns an integer that indicates the hour when the
   persona wakes up.
@@ -112,7 +111,7 @@ def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=verbose):
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -122,7 +121,7 @@ def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=verbose):
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_daily_plan(persona, wake_up_hour, test_input=None, verbose=verbose):
+def run_gpt_prompt_daily_plan(persona, wake_up_hour, test_input=None, verbose=False):
   """
   ChatGPT version: Long term planning that spans a day.
 
@@ -194,7 +193,7 @@ def run_gpt_prompt_daily_plan(persona, wake_up_hour, test_input=None, verbose=ve
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   # Add wake up as first activity
@@ -209,7 +208,7 @@ def run_gpt_prompt_daily_plan(persona, wake_up_hour, test_input=None, verbose=ve
 
 def run_gpt_prompt_generate_hourly_schedule(persona, curr_hour_str, p_f_ds_hourly_org,
                                                 hour_str, intermission2=None,
-                                                test_input=None, verbose=verbose):
+                                                test_input=None, verbose=False):
   """
   ChatGPT version: Generate hourly schedule based on daily plan.
 
@@ -311,7 +310,7 @@ def run_gpt_prompt_generate_hourly_schedule(persona, curr_hour_str, p_f_ds_hourl
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -325,7 +324,7 @@ def run_gpt_prompt_task_decomp(persona,
                                     task,
                                     duration,
                                     test_input=None,
-                                    verbose=True):
+                                    verbose=False):
   print("[run_gpt_prompt_task_decomp] Running task decomposition...")
   """
   ChatGPT version: Decompose a task into subtasks with durations.
@@ -487,7 +486,7 @@ def run_gpt_prompt_task_decomp(persona,
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   # Prevent overflow - ensure total duration matches
@@ -526,7 +525,7 @@ def run_gpt_prompt_task_decomp(persona,
 
 
 def run_gpt_prompt_action_sector(action_description, persona, maze,
-                                     test_input=None, verbose=verbose):
+                                     test_input=None, verbose=False):
   """
   ChatGPT version: Determine which sector the persona should go to for an action.
 
@@ -619,7 +618,7 @@ def run_gpt_prompt_action_sector(action_description, persona, maze,
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   # Validate output is in accessible sectors
@@ -634,9 +633,9 @@ def run_gpt_prompt_action_sector(action_description, persona, maze,
 
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
-
+# 经过了一次改动，验证函数中检验花括号，但是ChatGPT_safe_generate_response函数中已经有清理花括号的操作，所以这里不需要再检验花括号了
 def run_gpt_prompt_action_arena(action_description, persona, maze, act_world, act_sector,
-                                     test_input=None, verbose=verbose):
+                                     test_input=None, verbose=False):
   """
   ChatGPT version: Determine which arena the persona should go to for an action.
 
@@ -691,13 +690,16 @@ def run_gpt_prompt_action_arena(action_description, persona, maze, act_world, ac
     return cleaned_response
 
   def __chat_func_validate(gpt_response, prompt=""):
-    if len(gpt_response.strip()) < 1:
+    try:
+      gpt_response = __chat_func_clean_up(gpt_response, prompt="")
+      # After cleanup, check if response is valid (not empty, no multiple values)
+      if len(gpt_response.strip()) < 1:
+        return False
+      if "," in gpt_response:
+        return False
+      return True
+    except Exception:
       return False
-    if "}" not in gpt_response:
-      return False
-    if "," in gpt_response:
-      return False
-    return True
 
   def get_fail_safe():
     fs = "kitchen"
@@ -724,7 +726,7 @@ def run_gpt_prompt_action_arena(action_description, persona, maze, act_world, ac
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -735,7 +737,7 @@ def run_gpt_prompt_action_arena(action_description, persona, maze, act_world, ac
 
 
 def run_gpt_prompt_action_game_object(action_description, persona, maze, temp_address,
-                                           test_input=None, verbose=verbose):
+                                           test_input=None, verbose=False):
   """
   ChatGPT version: Determine which game object the persona should interact with for an action.
 
@@ -790,7 +792,7 @@ def run_gpt_prompt_action_game_object(action_description, persona, maze, temp_ad
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   x = [i.strip() for i in persona.s_mem.get_str_accessible_arena_game_objects(temp_address).split(",")]
@@ -804,7 +806,7 @@ def run_gpt_prompt_action_game_object(action_description, persona, maze, temp_ad
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_pronunciatio(action_description, persona, test_input=None, verbose=verbose):
+def run_gpt_prompt_pronunciatio(action_description, persona, test_input=None, verbose=False):
   """
   ChatGPT version: Generate emoji representation for an action.
 
@@ -861,7 +863,7 @@ def run_gpt_prompt_pronunciatio(action_description, persona, test_input=None, ve
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -871,7 +873,7 @@ def run_gpt_prompt_pronunciatio(action_description, persona, test_input=None, ve
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_event_triple(action_description, persona, test_input=None, verbose=verbose):
+def run_gpt_prompt_event_triple(action_description, persona, test_input=None, verbose=False):
   """
   ChatGPT version: Generate event triple (subject, predicate, object) for an action.
 
@@ -932,7 +934,7 @@ def run_gpt_prompt_event_triple(action_description, persona, test_input=None, ve
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if persona:
@@ -950,7 +952,7 @@ def run_gpt_prompt_event_triple(action_description, persona, test_input=None, ve
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=verbose):
+def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=False):
   """
   ChatGPT version: Generate object event description.
 
@@ -1003,7 +1005,7 @@ def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=verb
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -1013,7 +1015,7 @@ def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=verb
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, verbose=verbose):
+def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, verbose=False):
   """
   ChatGPT version: Generate event triple for an object.
 
@@ -1067,7 +1069,7 @@ def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, 
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   output = (act_game_object, output[0], output[1])
@@ -1081,7 +1083,7 @@ def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, 
 
 def run_gpt_prompt_new_decomp_schedule(persona, main_act_dur, truncated_act_dur,
                                             start_time_hour, end_time_hour, inserted_act,
-                                            inserted_act_dur, test_input=None, verbose=verbose):
+                                            inserted_act_dur, test_input=None, verbose=False):
   """
   ChatGPT version: Generate new decomposed schedule when an activity is inserted.
 
@@ -1215,7 +1217,7 @@ def run_gpt_prompt_new_decomp_schedule(persona, main_act_dur, truncated_act_dur,
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -1226,7 +1228,7 @@ def run_gpt_prompt_new_decomp_schedule(persona, main_act_dur, truncated_act_dur,
 
 
 def run_gpt_prompt_decide_to_talk(persona, target_persona, retrieved, test_input=None,
-                                       verbose=verbose):
+                                       verbose=False):
   """
   ChatGPT version: Decide whether to initiate conversation with another persona.
 
@@ -1327,7 +1329,7 @@ def run_gpt_prompt_decide_to_talk(persona, target_persona, retrieved, test_input
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -1338,7 +1340,7 @@ def run_gpt_prompt_decide_to_talk(persona, target_persona, retrieved, test_input
 
 
 def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved, test_input=None,
-                                        verbose=verbose):
+                                        verbose=False):
   """
   ChatGPT version: Decide how to react to another persona.
 
@@ -1437,7 +1439,7 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved, test_inpu
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -1448,7 +1450,7 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved, test_inpu
 
 
 def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
-                                            test_input=None, verbose=verbose):
+                                            test_input=None, verbose=False):
   """
   ChatGPT version: Create a conversation between two personas.
 
@@ -1570,7 +1572,7 @@ def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -1580,7 +1582,7 @@ def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_summarize_conversation(persona, conversation, test_input=None, verbose=verbose):
+def run_gpt_prompt_summarize_conversation(persona, conversation, test_input=None, verbose=False):
   """
   ChatGPT version: Summarize a conversation.
 
@@ -1633,7 +1635,7 @@ def run_gpt_prompt_summarize_conversation(persona, conversation, test_input=None
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -1643,7 +1645,7 @@ def run_gpt_prompt_summarize_conversation(persona, conversation, test_input=None
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_extract_keywords(persona, description, test_input=None, verbose=verbose):
+def run_gpt_prompt_extract_keywords(persona, description, test_input=None, verbose=False):
   """
   ChatGPT version: Extract keywords from a description.
 
@@ -1704,7 +1706,7 @@ def run_gpt_prompt_extract_keywords(persona, description, test_input=None, verbo
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -1714,7 +1716,7 @@ def run_gpt_prompt_extract_keywords(persona, description, test_input=None, verbo
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_keyword_to_thoughts(persona, keyword, concept_summary, test_input=None, verbose=verbose):
+def run_gpt_prompt_keyword_to_thoughts(persona, keyword, concept_summary, test_input=None, verbose=False):
   """
   ChatGPT version: Generate thoughts from a keyword.
 
@@ -1764,7 +1766,7 @@ def run_gpt_prompt_keyword_to_thoughts(persona, keyword, concept_summary, test_i
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -1775,7 +1777,7 @@ def run_gpt_prompt_keyword_to_thoughts(persona, keyword, concept_summary, test_i
 
 
 def run_gpt_prompt_convo_to_thoughts(persona, init_persona_name, target_persona_name,
-                                          convo_str, fin_target, test_input=None, verbose=verbose):
+                                          convo_str, fin_target, test_input=None, verbose=False):
   """
   ChatGPT version: Generate thoughts from a conversation.
 
@@ -1827,7 +1829,7 @@ def run_gpt_prompt_convo_to_thoughts(persona, init_persona_name, target_persona_
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -1837,7 +1839,7 @@ def run_gpt_prompt_convo_to_thoughts(persona, init_persona_name, target_persona_
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, verbose=verbose):
+def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, verbose=False):
   """
   ChatGPT version: Rate the poignancy/importance of an event.
 
@@ -1888,7 +1890,7 @@ def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, 
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -1898,7 +1900,7 @@ def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, 
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_thought_poignancy(persona, event_description, test_input=None, verbose=verbose):
+def run_gpt_prompt_thought_poignancy(persona, event_description, test_input=None, verbose=False):
   """
   ChatGPT version: Rate the poignancy/importance of a thought.
 
@@ -1949,7 +1951,7 @@ def run_gpt_prompt_thought_poignancy(persona, event_description, test_input=None
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -1959,7 +1961,7 @@ def run_gpt_prompt_thought_poignancy(persona, event_description, test_input=None
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_chat_poignancy(persona, event_description, test_input=None, verbose=verbose):
+def run_gpt_prompt_chat_poignancy(persona, event_description, test_input=None, verbose=False):
   """
   ChatGPT version: Rate the poignancy/importance of a chat.
 
@@ -2010,7 +2012,7 @@ def run_gpt_prompt_chat_poignancy(persona, event_description, test_input=None, v
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -2020,7 +2022,7 @@ def run_gpt_prompt_chat_poignancy(persona, event_description, test_input=None, v
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=verbose):
+def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=False):
   """
   ChatGPT version: Generate focal points/questions from statements.
 
@@ -2070,7 +2072,7 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=ver
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -2080,7 +2082,7 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=ver
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_insight_and_guidance(persona, statements, n, test_input=None, verbose=verbose):
+def run_gpt_prompt_insight_and_guidance(persona, statements, n, test_input=None, verbose=False):
   """
   ChatGPT version: Generate insights and evidence from statements.
 
@@ -2138,7 +2140,7 @@ def run_gpt_prompt_insight_and_guidance(persona, statements, n, test_input=None,
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -2149,7 +2151,7 @@ def run_gpt_prompt_insight_and_guidance(persona, statements, n, test_input=None,
 
 
 def run_gpt_prompt_agent_chat_summarize_ideas(persona, target_persona, statements, curr_context,
-                                                   test_input=None, verbose=verbose):
+                                                   test_input=None, verbose=False):
   """
   ChatGPT version: Summarize ideas for agent chat.
 
@@ -2200,7 +2202,7 @@ def run_gpt_prompt_agent_chat_summarize_ideas(persona, target_persona, statement
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -2211,7 +2213,7 @@ def run_gpt_prompt_agent_chat_summarize_ideas(persona, target_persona, statement
 
 
 def run_gpt_prompt_agent_chat_summarize_relationship(persona, target_persona, statements,
-                                                          test_input=None, verbose=verbose):
+                                                          test_input=None, verbose=False):
   """
   ChatGPT version: Summarize relationship for agent chat.
 
@@ -2260,7 +2262,7 @@ def run_gpt_prompt_agent_chat_summarize_relationship(persona, target_persona, st
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -2271,7 +2273,7 @@ def run_gpt_prompt_agent_chat_summarize_relationship(persona, target_persona, st
 
 
 def run_gpt_prompt_agent_chat(maze, persona, target_persona, curr_context,
-                                   init_summ_idea, target_summ_idea, test_input=None, verbose=verbose):
+                                   init_summ_idea, target_summ_idea, test_input=None, verbose=False):
   """
   ChatGPT version: Generate agent chat conversation.
 
@@ -2351,7 +2353,7 @@ def run_gpt_prompt_agent_chat(maze, persona, target_persona, curr_context,
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -2361,7 +2363,7 @@ def run_gpt_prompt_agent_chat(maze, persona, target_persona, curr_context,
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_summarize_ideas(persona, statements, question, test_input=None, verbose=verbose):
+def run_gpt_prompt_summarize_ideas(persona, statements, question, test_input=None, verbose=False):
   """
   ChatGPT version: Summarize ideas based on statements and a question.
 
@@ -2410,7 +2412,7 @@ def run_gpt_prompt_summarize_ideas(persona, statements, question, test_input=Non
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -2421,7 +2423,7 @@ def run_gpt_prompt_summarize_ideas(persona, statements, question, test_input=Non
 
 
 def run_gpt_prompt_generate_next_convo_line(persona, interlocutor_desc, prev_convo,
-                                                 retrieved_summary, test_input=None, verbose=verbose):
+                                                 retrieved_summary, test_input=None, verbose=False):
   """
   ChatGPT version: Generate next conversation line.
 
@@ -2479,7 +2481,7 @@ def run_gpt_prompt_generate_next_convo_line(persona, interlocutor_desc, prev_con
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -2489,7 +2491,7 @@ def run_gpt_prompt_generate_next_convo_line(persona, interlocutor_desc, prev_con
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_generate_whisper_inner_thought(persona, whisper, test_input=None, verbose=verbose):
+def run_gpt_prompt_generate_whisper_inner_thought(persona, whisper, test_input=None, verbose=False):
   """
   ChatGPT version: Generate inner thought from whisper.
 
@@ -2537,7 +2539,7 @@ def run_gpt_prompt_generate_whisper_inner_thought(persona, whisper, test_input=N
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -2547,7 +2549,7 @@ def run_gpt_prompt_generate_whisper_inner_thought(persona, whisper, test_input=N
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_planning_thought_on_convo(persona, all_utt, test_input=None, verbose=verbose):
+def run_gpt_prompt_planning_thought_on_convo(persona, all_utt, test_input=None, verbose=False):
   """
   ChatGPT version: Generate planning thought based on conversation.
 
@@ -2595,7 +2597,7 @@ def run_gpt_prompt_planning_thought_on_convo(persona, all_utt, test_input=None, 
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -2605,7 +2607,7 @@ def run_gpt_prompt_planning_thought_on_convo(persona, all_utt, test_input=None, 
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
 
-def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=verbose):
+def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=False):
   """
   ChatGPT version: Generate memo/memory based on conversation.
 
@@ -2653,7 +2655,7 @@ def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=verb
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -2664,7 +2666,7 @@ def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=verb
 
 
 
-def run_gpt_prompt_generate_safety_score(persona, comment, test_input=None, verbose=verbose):
+def run_gpt_prompt_generate_safety_score(persona, comment, test_input=None, verbose=False):
   """
   ChatGPT version: Generate safety score for a comment (content moderation).
 
@@ -2713,7 +2715,7 @@ def run_gpt_prompt_generate_safety_score(persona, comment, test_input=None, verb
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
@@ -2751,7 +2753,7 @@ def extract_first_json_dict(data_str):
 
 def run_gpt_prompt_generate_iterative_chat_utt(maze, init_persona, target_persona,
                                                      retrieved, curr_context, curr_chat,
-                                                     test_input=None, verbose=verbose):
+                                                     test_input=None, verbose=False):
   """
   GPT version: Generate next utterance in iterative chat.
   INPUT:
@@ -2853,7 +2855,7 @@ def run_gpt_prompt_generate_iterative_chat_utt(maze, init_persona, target_person
     fail_safe_response=fail_safe,
     func_validate=__chat_func_validate,
     func_clean_up=__chat_func_clean_up,
-    verbose=verbose
+    verbose=False
   )
 
   if verbose:
