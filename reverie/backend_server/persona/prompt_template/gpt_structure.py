@@ -137,6 +137,7 @@ def ChatGPT_safe_generate_response(prompt,
   if verbose: 
     print ("CHAT GPT PROMPT")
     print (prompt)
+    print ("~~~~PROMPT END~~~~")
 
   for i in range(repeat): 
 
@@ -158,10 +159,11 @@ def ChatGPT_safe_generate_response(prompt,
         print (curr_gpt_response)
         print ("~~~~")
 
-    except: 
+    except:
       pass
 
-  return False
+  print("FAIL SAFE TRIGGERED")
+  return fail_safe_response
 
 
 def ChatGPT_safe_generate_response_OLD(prompt, 
