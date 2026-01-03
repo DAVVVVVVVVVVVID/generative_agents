@@ -1077,6 +1077,7 @@ def plan(persona, maze, personas, new_day, retrieved):
   # other in an infinite loop. So, chatting_with_buffer maintains a form of 
   # buffer that makes the persona wait from talking to the same target 
   # immediately after chatting once. We keep track of the buffer value here. 
+  # 我们想确保角色不会在无限循环中继续相互交谈。 因此，chatting_with_buffer维护一种缓冲形式，使角色在与同一目标交谈一次后立即等待交谈。 我们在这里跟踪缓冲值。
   curr_persona_chat_buffer = persona.scratch.chatting_with_buffer
   for persona_name, buffer_count in curr_persona_chat_buffer.items():
     if persona_name != persona.scratch.chatting_with: 

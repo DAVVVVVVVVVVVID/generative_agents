@@ -22,14 +22,19 @@ class Maze:
     # Reading in the meta information about the world. If you want tp see the
     # example variables, check out the maze_meta_info.json file. 
     meta_info = json.load(open(f"{env_matrix}/maze_meta_info.json"))
+
+    # 地图的基本信息
+
     # <maze_width> and <maze_height> denote the number of tiles make up the 
     # height and width of the map. 
+    # 地图宽度和高度表示构成地图高度和宽度的瓷砖大小。
     self.maze_width = int(meta_info["maze_width"])
     self.maze_height = int(meta_info["maze_height"])
     # <sq_tile_size> denotes the pixel height/width of a tile. 
     self.sq_tile_size = int(meta_info["sq_tile_size"])
     # <special_constraint> is a string description of any relevant special 
-    # constraints the world might have. 
+    # constraints the world might have.
+    # 特殊约束是对世界可能具有的任何相关特殊约束的字符串描述。 
     # e.g., "planning to stay at home all day and never go out of her home"
     self.special_constraint = meta_info["special_constraint"]
 
@@ -40,11 +45,17 @@ class Maze:
     # e.g., "25335, Double Studio, Studio, Common Room"
     # And here is another example row for the game object block file: 
     # e.g, "25331, Double Studio, Studio, Bedroom 2, Painting"
+    # 这里是 arena 块文件的示例行：
+    # 例如，“25335，Double Studio，Studio，Common Room”
+    # 这是游戏对象块文件的另一个示例行：
+    # 例如，“25331，Double Studio，Studio，Bedroom 2，Painting”
 
     # Notice that the first element here is the color marker digit from the 
     # Tiled export. Then we basically have the block path: 
     # World, Sector, Arena, Game Object -- again, these paths need to be 
     # unique within an instance of Reverie. 
+    # 请注意，这里的第一个元素是 Tiled 导出的颜色标记数字。然后我们基本上有块路径：
+    # World、Sector、Arena、Game Object —— 再次，这些路径需要在 Reverie 实例中是唯一的。
     blocks_folder = f"{env_matrix}/special_blocks"
 
     _wb = blocks_folder + "/world_blocks.csv"
@@ -74,6 +85,8 @@ class Maze:
     # [SECTION 3] Reading in the matrices 
     # This is your typical two dimensional matrices. It's made up of 0s and 
     # the number that represents the color block from the blocks folder. 
+    # 读取矩阵
+    # 这是典型的二维矩阵。它由 0 和表示块文件夹中颜色块的数字组成。
     maze_folder = f"{env_matrix}/maze"
 
     _cm = maze_folder + "/collision_maze.csv"
@@ -96,6 +109,9 @@ class Maze:
     # identical (e.g., 70 x 40).
     # example format: [['0', '0', ... '25309', '0',...], ['0',...]...]
     # 25309 is the collision bar number right now.
+    # 加载迷宫。迷宫直接取自 Tiled 地图的 json 导出。它们应该是 csv 格式。
+    # 重要的是，它们不是二维矩阵格式——它们是单行矩阵，长度为迷宫的宽度 x 高度。因此，我们需要在这里转换。
+    # 由于所有这些矩阵的维度都是相同的（例如，70 x 40），所以我们可以一次性完成。
     self.collision_maze = []
     sector_maze = []
     arena_maze = []
@@ -124,6 +140,19 @@ class Maze:
     #         'collision': False,
     #         'events': {('double studio:double studio:bedroom 2:bed',
     #                    None, None)}} 
+
+    # 当我们完成迷宫的加载后，我们现在设置 self.tiles。这是一个按行访问的矩阵：列，其中每个访问点都是一个包含该瓷砖中发生的所有事情的字典。
+    # 更具体地说，它包含有关其“world”、“sector”、“arena”、“game_object”、“spawning_location”的信息，以及它是否是碰撞块，以及发生在其中的所有事件的集合。
+    # 例如，self.tiles[32][59] = {'world': 'double studio
+    #           'sector': '', 'arena': '', 'game_object': '',
+    #           'spawning_location': '', 'collision': False, 'events': set()}
+    # 例如，self.tiles[9][58] = {'world': 'double studio
+    #         'sector': 'double studio', 'arena': 'bedroom 2',
+    #         'game_object': 'bed', 'spawning_location': 'bedroom-2-a',
+    #         'collision': False,
+    #         'events': {('double studio:double studio:bedroom 2:bed',
+    #                    None, None)}}
+    # 历史遗留的events是3元组，实际已经变成了4元组. (subject, predicate, object, description)
     self.tiles = []
     for i in range(self.maze_height): 
       row = []
@@ -175,6 +204,12 @@ class Maze:
     # self.address_tiles['<spawn_loc>bedroom-2-a'] == {(58, 9)}
     # self.address_tiles['double studio:recreation:pool table'] 
     #   == {(29, 14), (31, 11), (30, 14), (32, 11), ...}, 
+    # 反转瓷砖访问。
+    # <self.address_tiles>——给定字符串地址，我们返回属于该地址的所有
+    # 瓷砖坐标的集合（这与 self.tiles 相反，self.tiles 给出给定坐标的字符串地址）。这是为角色的运动寻找路径的优化组件。
+    # self.address_tiles['<spawn_loc>bedroom-2-a'] == {(58, 9)}
+    # self.address_tiles['double studio:recreation:pool table']
+    #   == {(29, 14), (31, 11), (30, 14), (32, 11), ...},
     self.address_tiles = dict()
     for i in range(self.maze_height):
       for j in range(self.maze_width): 
@@ -205,59 +240,94 @@ class Maze:
             self.address_tiles[add] = set([(j, i)])
 
 
-  def turn_coordinate_to_tile(self, px_coordinate): 
+  def turn_coordinate_to_tile(self, px_coordinate):
     """
-    Turns a pixel coordinate to a tile coordinate. 
+    Turns a pixel coordinate to a tile coordinate.
 
     INPUT
       px_coordinate: The pixel coordinate of our interest. Comes in the x, y
-                     format. 
+                     format.
     OUTPUT
-      tile coordinate (x, y): The tile coordinate that corresponds to the 
-                              pixel coordinate. 
-    EXAMPLE OUTPUT 
+      tile coordinate (x, y): The tile coordinate that corresponds to the
+                              pixel coordinate.
+    EXAMPLE OUTPUT
       Given (1600, 384), outputs (50, 12)
+
+    将像素坐标转换为瓦片坐标。
+
+    输入
+      px_coordinate: 我们感兴趣的像素坐标。格式为 x, y。
+    输出
+      tile coordinate (x, y): 对应于像素坐标的瓦片坐标。
+    示例输出
+      给定 (1600, 384)，输出 (50, 12)
     """
     x = math.ceil(px_coordinate[0]/self.sq_tile_size)
     y = math.ceil(px_coordinate[1]/self.sq_tile_size)
     return (x, y)
 
 
-  def access_tile(self, tile): 
+  def access_tile(self, tile):
     """
-    Returns the tiles details dictionary that is stored in self.tiles of the 
-    designated x, y location. 
+    Returns the tiles details dictionary that is stored in self.tiles of the
+    designated x, y location.
 
     INPUT
       tile: The tile coordinate of our interest in (x, y) form.
     OUTPUT
-      The tile detail dictionary for the designated tile. 
+      The tile detail dictionary for the designated tile.
     EXAMPLE OUTPUT
-      Given (58, 9), 
-      self.tiles[9][58] = {'world': 'double studio', 
-            'sector': 'double studio', 'arena': 'bedroom 2', 
-            'game_object': 'bed', 'spawning_location': 'bedroom-2-a', 
+      Given (58, 9),
+      self.tiles[9][58] = {'world': 'double studio',
+            'sector': 'double studio', 'arena': 'bedroom 2',
+            'game_object': 'bed', 'spawning_location': 'bedroom-2-a',
             'collision': False,
             'events': {('double studio:double studio:bedroom 2:bed',
-                       None, None)}} 
+                       None, None)}}
+
+    返回存储在 self.tiles 中指定 x, y 位置的瓦片详细信息字典。
+
+    输入
+      tile: 我们感兴趣的瓦片坐标，格式为 (x, y)。
+    输出
+      指定瓦片的详细信息字典。
+    示例输出
+      给定 (58, 9)，
+      self.tiles[9][58] = {'world': 'double studio',
+            'sector': 'double studio', 'arena': 'bedroom 2',
+            'game_object': 'bed', 'spawning_location': 'bedroom-2-a',
+            'collision': False,
+            'events': {('double studio:double studio:bedroom 2:bed',
+                       None, None)}}
     """
     x = tile[0]
     y = tile[1]
     return self.tiles[y][x]
 
 
-  def get_tile_path(self, tile, level): 
+  def get_tile_path(self, tile, level):
     """
     Get the tile string address given its coordinate. You designate the level
-    by giving it a string level description. 
+    by giving it a string level description.
 
-    INPUT: 
+    INPUT:
       tile: The tile coordinate of our interest in (x, y) form.
       level: world, sector, arena, or game object
     OUTPUT
       The string address for the tile.
     EXAMPLE OUTPUT
       Given tile=(58, 9), and level=arena,
+      "double studio:double studio:bedroom 2"
+
+    根据瓦片坐标获取其字符串地址。通过字符串级别描述来指定层级。
+
+    输入:
+      tile: 我们感兴趣的瓦片坐标，格式为 (x, y)。
+      level: world、sector、arena 或 game object
+    输出
+      瓦片的字符串地址。
+    示例输出
+      给定 tile=(58, 9) 和 level=arena，
       "double studio:double studio:bedroom 2"
     """
     x = tile[0]
@@ -283,23 +353,38 @@ class Maze:
     return path
 
 
-  def get_nearby_tiles(self, tile, vision_r): 
+  def get_nearby_tiles(self, tile, vision_r):
     """
-    Given the current tile and vision_r, return a list of tiles that are 
-    within the radius. Note that this implementation looks at a square 
-    boundary when determining what is within the radius. 
-    i.e., for vision_r, returns x's. 
-    x x x x x 
+    Given the current tile and vision_r, return a list of tiles that are
+    within the radius. Note that this implementation looks at a square
+    boundary when determining what is within the radius.
+    i.e., for vision_r, returns x's.
     x x x x x
-    x x P x x 
+    x x x x x
+    x x P x x
     x x x x x
     x x x x x
 
-    INPUT: 
+    INPUT:
       tile: The tile coordinate of our interest in (x, y) form.
-      vision_r: The radius of the persona's vision. 
-    OUTPUT: 
-      nearby_tiles: a list of tiles that are within the radius. 
+      vision_r: The radius of the persona's vision.
+    OUTPUT:
+      nearby_tiles: a list of tiles that are within the radius.
+
+    给定当前瓦片和 vision_r，返回在半径内的瓦片列表。
+    注意，此实现在确定半径内的内容时使用正方形边界。
+    即，对于 vision_r，返回 x 标记的位置。
+    x x x x x
+    x x x x x
+    x x P x x
+    x x x x x
+    x x x x x
+
+    输入:
+      tile: 我们感兴趣的瓦片坐标，格式为 (x, y)。
+      vision_r: 角色的视野半径。
+    输出:
+      nearby_tiles: 在半径内的瓦片列表。
     """
     left_end = 0
     if tile[0] - vision_r > left_end: 
@@ -324,16 +409,26 @@ class Maze:
     return nearby_tiles
 
 
-  def add_event_from_tile(self, curr_event, tile): 
+  def add_event_from_tile(self, curr_event, tile):
     """
-    Add an event triple to a tile.  
+    Add an event triple to a tile.
 
-    INPUT: 
-      curr_event: Current event triple. 
+    INPUT:
+      curr_event: Current event triple.
         e.g., ('double studio:double studio:bedroom 2:bed', None,
                 None)
       tile: The tile coordinate of our interest in (x, y) form.
-    OUPUT: 
+    OUPUT:
+      None
+
+    向瓦片添加事件元组。
+
+    输入:
+      curr_event: 当前事件元组（实际为4元组）。
+        例如：('double studio:double studio:bedroom 2:bed', None,
+                None, None)
+      tile: 我们感兴趣的瓦片坐标，格式为 (x, y)。
+    输出:
       None
     """
     self.tiles[tile[1]][tile[0]]["events"].add(curr_event)
@@ -341,14 +436,24 @@ class Maze:
 
   def remove_event_from_tile(self, curr_event, tile):
     """
-    Remove an event triple from a tile.  
+    Remove an event triple from a tile.
 
-    INPUT: 
-      curr_event: Current event triple. 
+    INPUT:
+      curr_event: Current event triple.
         e.g., ('double studio:double studio:bedroom 2:bed', None,
                 None)
       tile: The tile coordinate of our interest in (x, y) form.
-    OUPUT: 
+    OUPUT:
+      None
+
+    从瓦片中移除事件元组。
+
+    输入:
+      curr_event: 当前事件元组（实际为4元组）。
+        例如：('double studio:double studio:bedroom 2:bed', None,
+                None, None)
+      tile: 我们感兴趣的瓦片坐标，格式为 (x, y)。
+    输出:
       None
     """
     curr_tile_ev_cp = self.tiles[tile[1]][tile[0]]["events"].copy()
@@ -358,9 +463,26 @@ class Maze:
 
 
   def turn_event_from_tile_idle(self, curr_event, tile):
+    """
+    Turn an event in a tile to idle state by clearing predicate, object, and description.
+
+    INPUT:
+      curr_event: Current event tuple to turn idle.
+      tile: The tile coordinate of our interest in (x, y) form.
+    OUTPUT:
+      None
+
+    将瓦片中的事件转为空闲状态，清除谓语、宾语和描述。
+
+    输入:
+      curr_event: 要转为空闲的当前事件元组。
+      tile: 我们感兴趣的瓦片坐标，格式为 (x, y)。
+    输出:
+      None
+    """
     curr_tile_ev_cp = self.tiles[tile[1]][tile[0]]["events"].copy()
-    for event in curr_tile_ev_cp: 
-      if event == curr_event:  
+    for event in curr_tile_ev_cp:
+      if event == curr_event:
         self.tiles[tile[1]][tile[0]]["events"].remove(event)
         new_event = (event[0], None, None, None)
         self.tiles[tile[1]][tile[0]]["events"].add(new_event)
@@ -368,12 +490,20 @@ class Maze:
 
   def remove_subject_events_from_tile(self, subject, tile):
     """
-    Remove an event triple that has the input subject from a tile. 
+    Remove an event triple that has the input subject from a tile.
 
-    INPUT: 
+    INPUT:
       subject: "Isabella Rodriguez"
       tile: The tile coordinate of our interest in (x, y) form.
-    OUPUT: 
+    OUPUT:
+      None
+
+    从瓦片中移除具有输入主语的事件元组。
+
+    输入:
+      subject: "Isabella Rodriguez"
+      tile: 我们感兴趣的瓦片坐标，格式为 (x, y)。
+    输出:
       None
     """
     curr_tile_ev_cp = self.tiles[tile[1]][tile[0]]["events"].copy()

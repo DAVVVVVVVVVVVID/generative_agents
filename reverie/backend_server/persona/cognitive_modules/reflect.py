@@ -43,7 +43,7 @@ def generate_insights_and_evidence(persona, nodes, n=5):
   for count, node in enumerate(nodes): 
     statements += f'{str(count)}. {node.embedding_key}\n'
 
-  ret = run_gpt_prompt_insight_and_guidance(persona, s tatements, n)[0]
+  ret = run_gpt_prompt_insight_and_guidance(persona, statements, n)[0]
 
   print (ret)
   try: 
